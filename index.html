@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -12,7 +13,7 @@
         title{
             font-family: 'Inter', sans-serif;
         }
-        
+
         :root {
             --bg: #000000;
             --fg: #ffffff;
@@ -492,6 +493,69 @@
             cursor: none; transition: var(--transition);
         }
         .server-join-btn:hover { background: transparent; color: var(--fg); transform: translateY(-5px); box-shadow: 0 15px 40px rgba(255,255,255,0.12); }
+
+        /* ============ MOBILE / PHONE VIEW (≤768px) ============ */
+        @media (max-width: 768px) {
+            * { -webkit-tap-highlight-color: transparent; }
+
+            main { padding: 90px 20px 60px; }
+
+            /* Header collapses: status top-left, nav stacked right, coords hidden */
+            .system-frame { padding: 16px; font-size: 8px; letter-spacing: 1px; }
+            .frame-top { flex-wrap: wrap; gap: 14px; }
+            .coords { display: none; }
+            .nav-links { flex-direction: column; align-items: flex-end; gap: 6px; }
+            .nav-link { font-size: 9px; padding: 2px 0; }
+            .nav-link.active { border-right: 1px solid #fff; padding-right: 6px; }
+            .frame-bottom { font-size: 8px; }
+
+            /* Hero stacks: quote on top, about panel below */
+            .hero { min-height: auto; flex-direction: column; align-items: stretch; gap: 40px; padding-top: 10px; }
+            .hero-text { flex: none; }
+            .hero-title { font-size: clamp(2.4rem, 11vw, 3.2rem); line-height: 0.9; }
+            .about-panel { flex: none; width: 100%; padding: 24px; }
+
+            /* Slider nodes shrink to phone size */
+            .deployment-slider { margin: 50px -20px; padding: 30px 0; }
+            .slider-track { gap: 20px; animation-duration: 30s; }
+            .server-node { min-width: 290px; padding: 14px 20px; gap: 15px; }
+            .server-icon { width: 40px; height: 40px; border-radius: 8px; }
+            .server-info h4 { font-size: 11px; }
+            .server-info p { font-size: 8px; }
+            .node-hint { display: none; }
+
+            /* Sections tighten, cards go full width */
+            .grid-container { gap: 16px; margin-top: 60px; }
+            .card { grid-column: span 12; padding: 24px; min-height: 220px; }
+            .card-title { font-size: 20px; margin: 12px 0; }
+            .card-desc { font-size: 13px; }
+            .artifact-large { grid-column: span 12; height: 350px; }
+            .section-label { font-size: 9px; margin-bottom: 24px; }
+
+            /* Footer stacks with compact link rows */
+            .site-footer { grid-template-columns: 1fr; gap: 60px; margin-top: 80px; padding-top: 50px; }
+            .footer-heading { font-size: clamp(2rem, 10vw, 2.6rem); margin-bottom: 24px; }
+            .footer-link { position: relative; flex-direction: column; align-items: flex-start; gap: 6px; padding: 16px 44px 16px 18px; }
+            .link-arrow { position: absolute; top: 16px; right: 16px; }
+            .footer-form { padding: 24px; }
+            .form-field input, .form-field select { padding: 12px 14px; font-size: 12px; }
+            .form-submit { padding: 16px; font-size: 11px; }
+
+            /* Popups go edge-to-edge */
+            .terms-modal { padding: 16px; }
+            .modal-box { padding: 28px 22px; }
+            .modal-title { font-size: 26px; }
+            .modal-box.server { width: 100%; }
+            .server-modal-banner { height: 180px; }
+            .server-body { padding: 8px 24px 32px; }
+            .server-modal-name { font-size: 24px; }
+        }
+
+        /* Touch devices: hide the custom cursor, restore the system cursor */
+        @media (hover: none), (pointer: coarse) {
+            * { cursor: auto !important; }
+            #cursor { display: none; }
+        }
 
     </style>
 </head>
