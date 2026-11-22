@@ -1,14 +1,18 @@
-<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://i.namu.wiki/i/q1VRFTW3hxvw65Wm6rCOPIkm_6g5A7ikVIKc5vo5S2VlTGIj3ISAccVzvC-vfsCul5f8KXuUDBeFcRkRxMmuVg.webp">
     <title>Mercury</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@300;500&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
+        title{
+            font-family: 'Inter', sans-serif;
+        }
+        
         :root {
             --bg: #000000;
             --fg: #ffffff;
@@ -41,7 +45,7 @@
             border: 1px solid #fff;
             border-radius: 50%;
             pointer-events: none;
-            z-index: 9999;
+            z-index: 10001;
             transform: translate(-50%, -50%);
             mix-blend-mode: difference;
             transition: width 0.3s, height 0.3s, background 0.3s;
@@ -200,6 +204,12 @@
             justify-content: center;
             font-family: 'Archivo Black';
             font-size: 18px;
+            overflow: hidden;
+        }
+        .server-icon-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .server-info h4 { font-family: 'Archivo Black'; text-transform: uppercase; font-size: 14px; }
@@ -281,7 +291,7 @@
             z-index: -1;
             filter: grayscale(1);
         }
-        .card:hover .artifact-img { opacity: 0.6; transform: scale(1.05); filter: grayscale(0.5); }
+        .card:hover .artifact-img { opacity: 0.85; transform: scale(1.05); filter: grayscale(0.4) brightness(1.45); }
         .card:hover { border-color: #fff; }
 
         .section-label {
@@ -537,7 +547,9 @@
             <div class="slider-track">
 
                 <div class="server-node" data-name="ANIME VANGUARDS" data-role="BUG HUNTER + ARTIST" data-scale="1.2M+ MEMBERS // STATUS: ACTIVE" data-link="https://discord.gg/animevanguards" data-banner="https://static.wikitide.net/vanguardswiki/thumb/e/e8/2nd_Anniversary_Anime_Vanguards_Thumbnail.jpg/1200px-2nd_Anniversary_Anime_Vanguards_Thumbnail.jpg" data-tag="FILE_001 // FPS_COMMUNITY">
-                    <div class="server-icon" href= "https://static.wikitide.net/vanguardswiki/thumb/e/e8/2nd_Anniversary_Anime_Vanguards_Thumbnail.jpg/1200px-2nd_Anniversary_Anime_Vanguards_Thumbnail.jpg"></div>
+                    <div class="server-icon">
+                        <img class="server-icon-img" src="https://static.wikitide.net/vanguardswiki/thumb/e/e8/2nd_Anniversary_Anime_Vanguards_Thumbnail.jpg/1200px-2nd_Anniversary_Anime_Vanguards_Thumbnail.jpg" alt="ANIME VANGUARDS icon">
+                    </div>
                     <div class="server-info">
                         <h4>ANIME VANGUARDS</h4>
                         <p>ROLE: BUG HUNTER + ARTIST // 1.2M+ MEMBERS</p>
@@ -545,7 +557,9 @@
                     <span class="node-hint">CLICK ▸ OPEN_FILE</span>
                 </div>
                 <div class="server-node" data-name="ANIME REBORN" data-role="TRAIL MODERATOR" data-scale="242K+ MEMBERS // STATUS: ACTIVE" data-link="https://discord.gg/anime-reborn" data-banner="https://sm.ign.com/ign_nordic/news/a/anime-rebo/anime-reborn-world-collision-update-celebrates-the-new-year_brw8.jpg" data-tag="FILE_002 // SAFETY_NET">
-                    <div class="server-icon" href = "https://sm.ign.com/ign_nordic/news/a/anime-rebo/anime-reborn-world-collision-update-celebrates-the-new-year_brw8.jpg"></div>
+                    <div class="server-icon">
+                        <img class="server-icon-img" src="https://sm.ign.com/ign_nordic/news/a/anime-rebo/anime-reborn-world-collision-update-celebrates-the-new-year_brw8.jpg" alt="ANIME REBORN icon">
+                    </div>
                     <div class="server-info">
                         <h4>ANIME REBORN</h4>
                         <p>ROLE: TRAIL MODERATOR // 242K+ MEMBERS</p>
@@ -553,7 +567,9 @@
                     <span class="node-hint">CLICK ▸ OPEN_FILE</span>
                 </div>
                 <div class="server-node" data-name="UNIVERSAL TOWER DEFENSE X" data-role="ARTIST" data-scale="526K+ MEMBERS // STATUS: ARCHIVED" data-link="https://discord.gg/universaltd" data-banner="https://static.wikia.nocookie.net/universal-tdx/images/8/8c/FestivalBannerP1.png/revision/latest/scale-to-width-down/670?cb=20260520113958" data-tag="FILE_003 // WEB3">
-                    <div class="server-icon" href="https://static.wikia.nocookie.net/universal-tdx/images/b/b6/Banner3.jpg/revision/latest/scale-to-width-down/670?cb=20260507084245"></div>
+                    <div class="server-icon">
+                        <img class="server-icon-img" src="https://static.wikia.nocookie.net/universal-tdx/images/b/b6/Banner3.jpg/revision/latest/scale-to-width-down/670?cb=20260507084245" alt="UNIVERSAL TOWER DEFENSE X icon">
+                    </div>
                     <div class="server-info">
                         <h4>UNIVERSAL TOWER DEFENSE X</h4>
                         <p>ROLE: ARTIST // 526K+ MEMBERS</p>
@@ -561,7 +577,9 @@
                     <span class="node-hint">CLICK ▸ OPEN_FILE</span>
                 </div>
                 <div class="server-node" data-name="ANIME ORIGINS" data-role="MODERATOR" data-scale="105K+ MEMBERS // STATUS: ACTIVE" data-link="https://discord.gg/animeorigins" data-banner="https://tr.rbxcdn.com/180DAY-921f16e3041d929ed22801e02394fad5/768/432/Image/Webp/noFilter" data-tag="FILE_004 // DEV_COMMUNITY">
-                    <div class="server-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2aYx3O3OReQxE--LhZh42WouIGU4ToN5Hs9jgmTPL46QGKCIpGbLvUCWT&s=10"></div>
+                    <div class="server-icon">
+                        <img class="server-icon-img" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2aYx3O3OReQxE--LhZh42WouIGU4ToN5Hs9jgmTPL46QGKCIpGbLvUCWT&s=10" alt="ANIME ORIGINS icon">
+                    </div>
                     <div class="server-info">
                         <h4>ANIME ORIGINS</h4>
                         <p>ROLE: MODERATOR + ARTIST // 105K+ MEMBERS</p>
@@ -570,7 +588,9 @@
                 </div>
 
                 <div class="server-node" data-name="DARK HAWKES" data-role="COMMUNITY MANAGER" data-scale="2.6K+ MEMBERS // STATUS: ACTIVE" data-link="https://discord.gg/TSVcQAaPm5" data-banner="https://i.pinimg.com/736x/e4/0a/52/e40a5212dcb9a7a095a9fe9a42234d28.jpg" data-tag="FILE_001 // FPS_COMMUNITY">
-                    <div class="server-icon" href="https://i.pinimg.com/736x/e4/0a/52/e40a5212dcb9a7a095a9fe9a42234d28.jpg"></div>
+                    <div class="server-icon">
+                        <img class="server-icon-img" src="https://i.pinimg.com/736x/e4/0a/52/e40a5212dcb9a7a095a9fe9a42234d28.jpg" alt="DARK HAWKES icon">
+                    </div>
                     <div class="server-info">
                         <h4>DARK HAWKES</h4>
                         <p>ROLE: COMMUNITY MANAGER // 2.6K MEMBERS</p>
@@ -578,7 +598,9 @@
                     <span class="node-hint">CLICK ▸ OPEN_FILE</span>
                 </div>
                 <div class="server-node" data-name="ANIME ORACLE" data-role="TESTER" data-scale="3K+ MEMBERS // STATUS: ACTIVE AND GROWING" data-link="https://discord.gg/animeoracle" data-banner="https://i.ytimg.com/vi/UyGBhWZ_ZvY/maxresdefault.jpg" data-tag="FILE_002 // SAFETY_NET">
-                    <div class="server-icon" style="color: #FF4500;">N</div>
+                    <div class="server-icon">
+                        <img class="server-icon-img" src="https://i.ytimg.com/vi/UyGBhWZ_ZvY/maxresdefault.jpg" alt="ANIME ORACLE icon">
+                    </div>
                     <div class="server-info">
                         <h4>ANIME ORACLE</h4>
                         <p>ROLE: TESTER // 3K+ MEMBERS</p>
@@ -683,7 +705,7 @@
                     <input type="checkbox" required>
                     <span>I HAVE READ &amp; ACCEPT THE <u id="terms-link">TERMS &amp; CONDITIONS</u></span>
                 </label>
-                <button type="submit" class="form-submit" href= "https://discord.com/users/1277325056015466526">SEND_TRANSMISSION →</button>
+                <button type="submit" class="form-submit">SEND_TRANSMISSION →</button>
             </form>
         </footer>
     </main>
@@ -808,14 +830,16 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Contact form transmission
+        // Contact form transmission — opens the Discord channel
         const contactForm = document.getElementById('contact-form');
+        const TRANSMISSION_URL = 'https://discord.com/channels/1565457116557352970/1565469616535511041';
         contactForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = contactForm.querySelector('.form-submit');
             const original = btn.innerText;
             btn.innerText = 'TRANSMISSION_SENT ✓';
             btn.disabled = true;
+            window.open(TRANSMISSION_URL, '_blank');
             setTimeout(() => {
                 contactForm.reset();
                 btn.innerText = original;
@@ -830,6 +854,9 @@
 
         termsLink.addEventListener('click', (e) => {
             e.preventDefault();
+            cursor.style.width = '20px';
+            cursor.style.height = '20px';
+            cursor.style.background = 'transparent';
             modal.classList.add('open');
         });
         modalClose.addEventListener('click', () => modal.classList.remove('open'));
@@ -855,6 +882,9 @@
                 smLink.href = node.dataset.link;
                 smBanner.src = node.dataset.banner;
                 smTag.textContent = node.dataset.tag;
+                cursor.style.width = '20px';
+                cursor.style.height = '20px';
+                cursor.style.background = 'transparent';
                 serverModal.classList.add('open');
             });
         });
@@ -874,7 +904,7 @@
                 const target = document.querySelector(link.getAttribute('href'));
                 if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
-        }); 
+        });
 
         const spyIds = ['core', 'history', 'functions', 'artifacts'];
         window.addEventListener('scroll', () => {
