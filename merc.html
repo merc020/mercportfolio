@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercury</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@300;500&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #000000;
+            --fg: #ffffff;
+            --accent: #222;
+            --dim: #666;
+            --grid: rgba(255, 255, 255, 0.03);
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: difference;
+            transition: width 0.3s, height 0.3s, background 0.3s;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        .system-frame {
+            position: fixed;
+            inset: 0;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 500;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .frame-top { display: flex; justify-content: space-between; pointer-events: auto; }
+        .frame-bottom { display: flex; justify-content: space-between; color: var(--dim); }
+
+        .nav-links { display: flex; gap: 40px; }
+        .nav-link { color: var(--dim); text-decoration: none; transition: var(--transition); }
+        .nav-link:hover { color: #fff; }
+        .nav-link.active { color: #fff; }
+        #core, #history, #functions, #artifacts { scroll-margin-top: 60px; }
+
+        main { padding: 120px 40px; }
+
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 60px;
+        }
+        .hero-text { flex: 1.3; }
+
+        .about-panel {
+            flex: 0 0 380px;
+            background: rgba(26, 26, 26, 0.4);
+            border: 1px solid var(--accent);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+        }
+        .about-tag {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--dim);
+            letter-spacing: 2px;
+            display: block;
+            border-bottom: 1px solid var(--accent);
+            padding-bottom: 14px;
+            margin-bottom: 18px;
+        }
+        .about-name {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 22px;
+            text-transform: lowercase;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+        .about-sub {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--dim);
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+        .about-list { list-style: none; }
+        .about-list li {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            line-height: 1.7;
+            color: #999;
+            margin-bottom: 10px;
+            padding-left: 14px;
+            position: relative;
+        }
+        .about-list li::before { content: '▸'; position: absolute; left: 0; color: var(--dim); }
+        .about-list strong { color: var(--fg); font-weight: 500; }
+
+        @media (max-width: 900px) {
+            .hero { flex-direction: column; align-items: flex-start; }
+            .about-panel { flex: none; width: 100%; }
+        }
+
+        .hero-meta {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--dim);
+            margin-bottom: 20px;
+        }
+
+        .hero-title {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: clamp(3rem, 8vw, 10rem);
+            line-height: 0.85;
+            letter-spacing: -0.05em;
+            text-transform: lowercase;
+            max-width: 1000px;
+        }
+
+        .deployment-slider {
+            margin: 100px -40px;
+            padding: 60px 0;
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid var(--accent);
+            border-bottom: 1px solid var(--accent);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slider-track {
+            display: flex;
+            gap: 40px;
+            width: max-content;
+            animation: scroll 40s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .server-node {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 40px;
+            background: #000;
+            border: 1px solid var(--accent);
+            min-width: 350px;
+        }
+
+        .server-icon {
+            width: 50px;
+            height: 50px;
+            background: #222;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Archivo Black';
+            font-size: 18px;
+        }
+
+        .server-info h4 { font-family: 'Archivo Black'; text-transform: uppercase; font-size: 14px; }
+        .server-info p { font-family: var(--font-mono); font-size: 10px; color: var(--dim); margin-top: 4px; }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+            margin-top: 100px;
+        }
+
+        .card {
+            background: rgba(26, 26, 26, 0.4);
+            border: 1px solid var(--accent);
+            padding: 40px;
+            position: relative;
+            transition: var(--transition);
+            transform-style: preserve-3d;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            grid-column: span 4;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .card-tag {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--dim);
+        }
+
+        .card-title {
+            font-family: 'Archivo Black';
+            font-size: 24px;
+            text-transform: uppercase;
+            margin: 20px 0;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #aaa;
+        }
+
+        .card-meta {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .badge {
+            font-size: 9px;
+            font-family: var(--font-mono);
+            padding: 4px 8px;
+            border: 1px solid #333;
+            text-transform: uppercase;
+        }
+
+        .artifact-large { grid-column: span 8; height: 500px; }
+        .artifact-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.3;
+            transition: var(--transition);
+            z-index: -1;
+            filter: grayscale(1);
+        }
+        .card:hover .artifact-img { opacity: 0.6; transform: scale(1.05); filter: grayscale(0.5); }
+        .card:hover { border-color: #fff; }
+
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--dim);
+            margin-bottom: 40px;
+            display: block;
+        }
+
+        .site-footer {
+            margin-top: 140px;
+            padding-top: 80px;
+            border-top: 1px solid var(--accent);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: start;
+        }
+        .footer-heading {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: clamp(2.4rem, 4vw, 3.6rem);
+            text-transform: lowercase;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            margin-bottom: 40px;
+        }
+        .footer-links { display: flex; flex-direction: column; gap: 14px; }
+        .footer-link {
+            display: flex; align-items: center; gap: 18px;
+            padding: 20px 24px;
+            background: rgba(26, 26, 26, 0.4);
+            border: 1px solid var(--accent);
+            text-decoration: none;
+            color: var(--fg);
+            transition: var(--transition);
+            transform-style: preserve-3d;
+        }
+        .footer-link:hover { border-color: #fff; transform: translateY(-5px); background: rgba(255,255,255,0.05); }
+        .link-tag { font-family: var(--font-mono); font-size: 9px; color: var(--dim); letter-spacing: 2px; min-width: 120px; }
+        .link-value { font-family: var(--font-mono); font-size: 13px; flex: 1; }
+        .link-arrow { font-family: var(--font-mono); font-size: 16px; transition: var(--transition); }
+        .footer-link:hover .link-arrow { transform: translate(4px, -4px); }
+        .footer-status { margin-top: 30px; font-family: var(--font-mono); font-size: 10px; color: var(--dim); letter-spacing: 2px; display: flex; align-items: center; gap: 10px; }
+        .status-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 12px rgba(255,255,255,0.8); } 50% { opacity: 0.3; box-shadow: none; } }
+        .footer-form { background: rgba(26, 26, 26, 0.4); border: 1px solid var(--accent); padding: 40px; backdrop-filter: blur(10px); }
+        .form-header { font-family: var(--font-mono); font-size: 10px; color: var(--dim); letter-spacing: 2px; margin-bottom: 30px; }
+        .form-field { display: block; margin-bottom: 22px; }
+        .form-label { display: block; font-family: var(--font-mono); font-size: 9px; color: var(--dim); letter-spacing: 2px; margin-bottom: 10px; }
+        .form-field input, .form-field select {
+            width: 100%;
+            background: #000;
+            border: 1px solid var(--accent);
+            color: var(--fg);
+            padding: 16px 18px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            outline: none;
+            border-radius: 0;
+            transition: var(--transition);
+            cursor: none;
+        }
+        .form-field select {
+            appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, var(--dim) 50%), linear-gradient(135deg, var(--dim) 50%, transparent 50%);
+            background-position: calc(100% - 22px) 50%, calc(100% - 16px) 50%;
+            background-size: 6px 6px;
+            background-repeat: no-repeat;
+        }
+        .form-field option { background: #000; color: var(--fg); }
+        .form-field input:focus, .form-field select:focus { border-color: #fff; background-color: rgba(255,255,255,0.04); }
+        .form-field input::placeholder { color: #444; }
+        .form-check { display: flex; align-items: center; gap: 12px; margin: 30px 0; cursor: none; }
+        .form-check input { width: 16px; height: 16px; accent-color: #fff; cursor: none; flex-shrink: 0; }
+        .form-check span { font-family: var(--font-mono); font-size: 10px; color: var(--dim); letter-spacing: 1px; }
+        .form-check u { color: var(--fg); }
+        .form-submit {
+            width: 100%; padding: 20px;
+            background: var(--fg); color: #000;
+            border: 1px solid var(--fg);
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+            cursor: none; transition: var(--transition);
+        }
+        .form-submit:hover { background: transparent; color: var(--fg); transform: translateY(-5px); box-shadow: 0 15px 40px rgba(255,255,255,0.12); }
+
+        .terms-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .terms-modal.open { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            width: 720px;
+            max-width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: #000;
+            border: 1px solid #fff;
+            padding: 50px;
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        .terms-modal.open .modal-box { transform: translateY(0); }
+        .modal-tag { font-family: var(--font-mono); font-size: 10px; color: var(--dim); letter-spacing: 2px; display: block; margin-bottom: 14px; }
+        .modal-title { font-family: 'Archivo Black', sans-serif; font-size: 32px; text-transform: lowercase; letter-spacing: -0.02em; margin-bottom: 10px; }
+        .modal-sub { font-family: var(--font-mono); font-size: 11px; color: var(--dim); margin-bottom: 40px; }
+        .modal-section { border-top: 1px solid var(--accent); padding: 24px 0; }
+        .modal-section h3 { font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--fg); margin-bottom: 12px; }
+        .modal-section h3::before { content: '> '; color: var(--dim); }
+        .modal-section p { font-family: var(--font-mono); font-size: 12px; line-height: 1.8; color: #999; margin-top: 10px; }
+        .modal-section ul { list-style: none; margin-top: 10px; }
+        .modal-section li { font-family: var(--font-mono); font-size: 12px; line-height: 1.8; color: #999; margin-bottom: 6px; }
+        .modal-section li::before { content: '— '; color: var(--dim); }
+        .modal-close {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--dim);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 2px;
+            padding: 10px 16px;
+            cursor: none;
+            transition: var(--transition);
+        }
+        .modal-close:hover { border-color: #fff; color: #fff; }
+        .modal-final {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            line-height: 1.8;
+            color: var(--fg);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--accent);
+            padding: 20px;
+            margin-top: 10px;
+        }
+        .modal-final strong { letter-spacing: 2px; }
+
+        /* Server node interactions */
+        .server-node { transition: var(--transition); }
+        .deployment-slider:hover .slider-track { animation-play-state: paused; }
+        .server-node:hover {
+            border-color: #fff;
+            background: rgba(255,255,255,0.06);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 60px rgba(255,255,255,0.1);
+        }
+        .server-node:hover .server-icon { transform: rotate(-10deg) scale(1.15); }
+        .server-icon { transition: var(--transition); }
+        .node-hint {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--dim);
+            letter-spacing: 2px;
+            margin-left: 24px;
+            padding-left: 24px;
+            border-left: 1px solid var(--accent);
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+        .server-node:hover .node-hint { color: #fff; border-color: #fff; }
+
+        /* Server detail modal */
+        .modal-box.server { padding: 0; width: 640px; }
+        .modal-box.server .modal-close { background: rgba(0,0,0,0.7); z-index: 2; }
+        .server-banner-wrap { position: relative; overflow: hidden; }
+        .server-modal-banner { width: 100%; height: 260px; object-fit: cover; display: block; }
+        .server-banner-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 40%, #000 100%); pointer-events: none; }
+        .modal-banner-tag {
+            position: absolute; top: 16px; left: 20px; z-index: 2;
+            font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px;
+            color: #fff; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.3); padding: 6px 10px;
+        }
+        .server-body { padding: 8px 44px 44px; }
+        .server-modal-name { font-family: 'Archivo Black', sans-serif; font-size: 34px; text-transform: uppercase; letter-spacing: -0.02em; margin-bottom: 10px; }
+        .server-modal-role { font-family: var(--font-mono); font-size: 11px; color: var(--dim); letter-spacing: 2px; margin-bottom: 30px; text-transform: uppercase; }
+        .server-modal-role strong { color: var(--fg); font-weight: 500; }
+        .server-join-btn {
+            display: block; width: 100%; padding: 20px;
+            background: var(--fg); color: #000;
+            border: 1px solid var(--fg);
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+            text-align: center; text-decoration: none;
+            cursor: none; transition: var(--transition);
+        }
+        .server-join-btn:hover { background: transparent; color: var(--fg); transform: translateY(-5px); box-shadow: 0 15px 40px rgba(255,255,255,0.12); }
+
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <div class="scanlines"></div>
+
+    <div class="system-frame">
+        <div class="frame-top">
+            <div class="status">
+                MERCURY'S<br>
+                PORTFOLIO
+            </div>
+            <div class="nav-links">
+                <a href="#core" class="nav-link">CORE</a>
+                <a href="#functions" class="nav-link">FUNCTIONS</a>
+                <a href="#artifacts" class="nav-link">ARTIFACTS</a>
+                <a href="#history" class="nav-link">HISTORY</a>
+            </div>
+            <div class="coords">
+                COORD: <span id="coord-x">0000</span> / <span id="coord-y">0000</span><br>
+                UTC: <span id="clock">00:00:00</span>
+            </div>
+        </div>
+        <div class="frame-bottom">
+            <div>© 2026 TERMINAL_PROTOCOL. ALL RIGHTS RESERVED.</div>
+        </div>
+    </div>
+
+    <main>
+        <section class="hero" id="core">
+            <div class="hero-text">
+                <div class="hero-meta">FROM TRANSFORMERS: REVENGE OF THE FALLEN</div>
+                <h1 class="hero-title">"like us, theres more to them than meets the eye".</h1>
+            </div>
+            <aside class="about-panel">
+                <span class="about-tag">[ 00 // ABOUT_ME ]</span>
+                <h2 class="about-name">mercury.</h2>
+                <div class="about-sub">AKA "MERC" // OPERATOR_PROFILE</div>
+                <ul class="about-list">
+                    <li><strong>SPECIALTIES:</strong> game wiki pages, server design, bot &amp; embed setup, moderation, dev services.</li>
+                    <li><strong>EDUCATION:</strong> BSc + MSc Computer Science — PhD candidate (CS &amp; Software Engineering).</li>
+                    <li><strong>CURRENT:</strong> self-employed web developer, 50+ designs shipped for small companies.</li>
+                    <li><strong>OBJECTIVE:</strong> build up new Discord servers and level up established ones.</li>
+                    <li><strong>OFF-CLOCK:</strong> novels, manga banner art (GCSE Art Grade 9), family time.</li>
+                    <li><strong>LANGUAGES:</strong> 9 spoken — EN, FR, DE, ES, PT, BR-PT, IT, Yoruba + learning Igbo.</li>
+                </ul>
+            </aside>
+        </section>
+
+        <section class="deployment-slider" id="history">
+            <div class="slider-track">
+
+                <div class="server-node" data-name="ANIME VANGUARDS" data-role="BUG HUNTER + ARTIST" data-scale="1.2M+ MEMBERS // STATUS: ACTIVE" data-link="https://discord.gg/animevanguards" data-banner="https://static.wikitide.net/vanguardswiki/thumb/e/e8/2nd_Anniversary_Anime_Vanguards_Thumbnail.jpg/1200px-2nd_Anniversary_Anime_Vanguards_Thumbnail.jpg" data-tag="FILE_001 // FPS_COMMUNITY">
+                    <div class="server-icon" href= "https://static.wikitide.net/vanguardswiki/thumb/e/e8/2nd_Anniversary_Anime_Vanguards_Thumbnail.jpg/1200px-2nd_Anniversary_Anime_Vanguards_Thumbnail.jpg"></div>
+                    <div class="server-info">
+                        <h4>ANIME VANGUARDS</h4>
+                        <p>ROLE: BUG HUNTER + ARTIST // 1.2M+ MEMBERS</p>
+                    </div>
+                    <span class="node-hint">CLICK ▸ OPEN_FILE</span>
+                </div>
+                <div class="server-node" data-name="ANIME REBORN" data-role="TRAIL MODERATOR" data-scale="242K+ MEMBERS // STATUS: ACTIVE" data-link="https://discord.gg/anime-reborn" data-banner="https://sm.ign.com/ign_nordic/news/a/anime-rebo/anime-reborn-world-collision-update-celebrates-the-new-year_brw8.jpg" data-tag="FILE_002 // SAFETY_NET">
+                    <div class="server-icon" href = "https://sm.ign.com/ign_nordic/news/a/anime-rebo/anime-reborn-world-collision-update-celebrates-the-new-year_brw8.jpg"></div>
+                    <div class="server-info">
+                        <h4>ANIME REBORN</h4>
+                        <p>ROLE: TRAIL MODERATOR // 242K+ MEMBERS</p>
+                    </div>
+                    <span class="node-hint">CLICK ▸ OPEN_FILE</span>
+                </div>
+                <div class="server-node" data-name="UNIVERSAL TOWER DEFENSE X" data-role="ARTIST" data-scale="526K+ MEMBERS // STATUS: ARCHIVED" data-link="https://discord.gg/universaltd" data-banner="https://static.wikia.nocookie.net/universal-tdx/images/8/8c/FestivalBannerP1.png/revision/latest/scale-to-width-down/670?cb=20260520113958" data-tag="FILE_003 // WEB3">
+                    <div class="server-icon" href="https://static.wikia.nocookie.net/universal-tdx/images/b/b6/Banner3.jpg/revision/latest/scale-to-width-down/670?cb=20260507084245"></div>
+                    <div class="server-info">
+                        <h4>UNIVERSAL TOWER DEFENSE X</h4>
+                        <p>ROLE: ARTIST // 526K+ MEMBERS</p>
+                    </div>
+                    <span class="node-hint">CLICK ▸ OPEN_FILE</span>
+                </div>
+                <div class="server-node" data-name="ANIME ORIGINS" data-role="MODERATOR" data-scale="105K+ MEMBERS // STATUS: ACTIVE" data-link="https://discord.gg/animeorigins" data-banner="https://tr.rbxcdn.com/180DAY-921f16e3041d929ed22801e02394fad5/768/432/Image/Webp/noFilter" data-tag="FILE_004 // DEV_COMMUNITY">
+                    <div class="server-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2aYx3O3OReQxE--LhZh42WouIGU4ToN5Hs9jgmTPL46QGKCIpGbLvUCWT&s=10"></div>
+                    <div class="server-info">
+                        <h4>ANIME ORIGINS</h4>
+                        <p>ROLE: MODERATOR + ARTIST // 105K+ MEMBERS</p>
+                    </div>
+                    <span class="node-hint">CLICK ▸ OPEN_FILE</span>
+                </div>
+
+                <div class="server-node" data-name="DARK HAWKES" data-role="COMMUNITY MANAGER" data-scale="2.6K+ MEMBERS // STATUS: ACTIVE" data-link="https://discord.gg/TSVcQAaPm5" data-banner="https://i.pinimg.com/736x/e4/0a/52/e40a5212dcb9a7a095a9fe9a42234d28.jpg" data-tag="FILE_001 // FPS_COMMUNITY">
+                    <div class="server-icon" href="https://i.pinimg.com/736x/e4/0a/52/e40a5212dcb9a7a095a9fe9a42234d28.jpg"></div>
+                    <div class="server-info">
+                        <h4>DARK HAWKES</h4>
+                        <p>ROLE: COMMUNITY MANAGER // 2.6K MEMBERS</p>
+                    </div>
+                    <span class="node-hint">CLICK ▸ OPEN_FILE</span>
+                </div>
+                <div class="server-node" data-name="ANIME ORACLE" data-role="TESTER" data-scale="3K+ MEMBERS // STATUS: ACTIVE AND GROWING" data-link="https://discord.gg/animeoracle" data-banner="https://i.ytimg.com/vi/UyGBhWZ_ZvY/maxresdefault.jpg" data-tag="FILE_002 // SAFETY_NET">
+                    <div class="server-icon" style="color: #FF4500;">N</div>
+                    <div class="server-info">
+                        <h4>ANIME ORACLE</h4>
+                        <p>ROLE: TESTER // 3K+ MEMBERS</p>
+                    </div>
+                    <span class="node-hint">CLICK ▸ OPEN_FILE</span>
+                </div>
+            </div>
+        </section>
+
+        <span class="section-label" id="functions">[ 01 // CORE_FUNCTIONS ]</span>
+        <div class="grid-container">
+            <div class="card">
+                <span class="card-tag">#001 // MANAGEMENT</span>
+                <h3 class="card-title">Community Manager and Above</h3>
+                <p class="card-desc">I can say with full confidence that I am a skilled community manager with a proven track record of building and maintaining thriving online communities. I also
+                    have 8 years of experience with coding and scripting, which allows me to create custom tools and features to enhance the community experience and manage wikis, create wikis and much more.
+                </p>
+                <div class="card-meta">
+                    <span class="badge">SCALE: 1.5M+</span>
+                    <span class="badge">MANAGEMENT</span>
+                </div>
+            </div>
+            <div class="card">
+                <span class="card-tag">#002 // STAFF</span>
+                <h3 class="card-title">SERVER MODERATION and Support</h3>
+                <p class="card-desc">Moderation and support is one of my core strengths, ensuring a safe and welcoming environment for all community members. I have 4 years of experience in this field and have worked
+                    with various large community management platforms.</p>
+                <div class="card-meta">
+                    <span class="badge">SECURITY</span>
+                    <span class="badge">SUPPORT</span>
+                </div>
+            </div>
+            <div class="card">
+                <span class="card-tag">#003 // ART</span>
+                <h3 class="card-title">Artist</h3>
+                <p class="card-desc">Art comes in the top 3 when it comes to my abilities. I really do love creating concept art and also drawing panels and banners. I'm also an intermediate modeler.</p>
+                <div class="card-meta">
+                    <span class="badge">CGI</span>
+                    <span class="badge">IDENTITY</span>
+                </div>
+            </div>
+        </div>
+
+        <span class="section-label" id="artifacts" style="margin-top: 100px;">[ 02 // VISUAL_ARTIFACTS ]</span>
+        <div class="grid-container">
+            <div class="card artifact-large">
+                <img src="https://i.pinimg.com/736x/60/1a/ee/601aee02360ae9321dd44470ee1cffc3.jpg" class="artifact-img" alt="DIEGO">
+                <span class="card-tag">IMG_ID_441 // 2026</span>
+                <h3 class="card-title">DIEGO</h3>
+                <div class="card-meta">
+                    <span class="badge">Collaboration with one of my friends</span>
+                    <span class="badge">By Merc</span>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://static.wikia.nocookie.net/jjba/images/9/98/AltDiegoDeath.jpg/revision/latest?cb=20210311044113" class="artifact-img" alt="BRANDO">
+                <span class="card-tag">IMG_ID_442 // 2026</span>
+                <h3 class="card-title">BRANDO</h3>
+                <div class="card-meta">
+                    <span class="badge">By Merc</span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="site-footer">
+            <div class="footer-col">
+                <span class="section-label" style="margin-bottom: 20px;">[ 03 // HIRE_ME ]</span>
+                <h2 class="footer-heading">contact me.</h2>
+                <div class="footer-links">
+                    <a href="https://discord.com/users/1277325056015466526" target="_blank" class="footer-link">
+                        <span class="link-tag">01 // PERSONAL</span>
+                        <span class="link-value">My Discord Profile</span>
+                        <span class="link-arrow">↗</span>
+                    </a>
+                    <a href="https://discord.gg/73gjMcVxpj" target="_blank" class="footer-link">
+                        <span class="link-tag">02 // PORTFOLIO</span>
+                        <span class="link-value">My Discord Portfolio for more information</span>
+                        <span class="link-arrow">↗</span>
+                    </a>
+                </div>
+                <div class="footer-status"><span class="status-dot"></span>STATUS: ONLINE // AVG RESPONSE: &lt; 24H</div>
+            </div>
+            <form class="footer-form" id="contact-form">
+                <div class="form-header">// OUTBOUND_TRANSMISSION — ROUTED VIA EMAIL</div>
+                <label class="form-field">
+                    <span class="form-label">FIELD_01 // YOUR_DISCORD_NAME</span>
+                    <input type="text" name="discord_name" placeholder="Discord Username" required>
+                </label>
+                <label class="form-field">
+                    <span class="form-label">FIELD_02 // ROLE_REQUESTED</span>
+                    <select name="role" required>
+                        <option value="" disabled selected>— SELECT ROLE —</option>
+                        <option>Community Manager</option>
+                        <option>Moderator</option>
+                        <option>Wiki Manager</option>
+                        <option>Helper</option>
+                        <option>Artist</option>
+                        <option>Other</option>
+                    </select>
+                </label>
+                <label class="form-check">
+                    <input type="checkbox" required>
+                    <span>I HAVE READ &amp; ACCEPT THE <u id="terms-link">TERMS &amp; CONDITIONS</u></span>
+                </label>
+                <button type="submit" class="form-submit">SEND_TRANSMISSION →</button>
+            </form>
+        </footer>
+    </main>
+
+    <div class="terms-modal" id="terms-modal">
+        <div class="modal-box">
+            <button class="modal-close">[ CLOSE_X ]</button>
+            <span class="modal-tag">[ POLICY // SERVICE_TERMS ]</span>
+            <h2 class="modal-title">terms &amp; conditions.</h2>
+            <p class="modal-sub">DOC: SERVICE_POLICY_V01 // LAST UPDATED: 2024</p>
+
+            <div class="modal-section">
+                <h3>Compensation</h3>
+                <p>For services provided by me, compensation may be accepted through:</p>
+                <ul>
+                    <li>Gamepasses</li>
+                    <li>Google Play Vouchers</li>
+                </ul>
+                <p>To clarify, I am currently not taking any real-life money transactions as of now. This is subject to change in the future, but as of now the above are the ways that I accept payment.</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>Before-hand Communication</h3>
+                <p>Before hiring me for a role, please make sure to prepare to discuss the role you would like me to take on, and the respective payments for the role.</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>Service Roles</h3>
+                <p>The roles I am experienced with are as follows; Moderation, Administration, Management and In-Game Testing, as well as other similar branches.</p>
+                <p>Anything that seems to drift from these roles can be discussed and contemplated with. Additional compensation may be requested if multiple of these roles are being handled at once.</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>Cancellations and Payment Issues</h3>
+                <p>Once an agreement has been made, both sides are expected to follow through with the agreed terms and conditions.</p>
+                <p>If an agreed payment is not provided, I may pause or discontinue the service until the situation is resolved.</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>Changes to Services</h3>
+                <p>I reserve the right to adjust, decline, or discontinue services when necessary. Any major changes to an existing agreement will be discussed beforehand whenever possible.</p>
+            </div>
+
+            <div class="modal-final">
+                <strong>AGREEMENT:</strong> By requesting my services, you acknowledge that you have read and understood this policy and agree to follow the terms discussed before work begins.
+            </div>
+        </div>
+    </div>
+
+    <div class="terms-modal" id="server-modal">
+        <div class="modal-box server">
+            <button class="modal-close">[ CLOSE_X ]</button>
+            <div class="server-banner-wrap">
+                <img id="server-banner" class="server-modal-banner" src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200" alt="Server Banner">
+                <span class="modal-banner-tag" id="server-tag">FILE_000</span>
+            </div>
+            <div class="server-body">
+                <span class="modal-tag">[ SERVER_FILE // DECRYPTED ]</span>
+                <h2 class="server-modal-name" id="server-name">SERVER_NAME</h2>
+                <div class="server-modal-role" id="server-role">MY ROLE: —</div>
+                <a id="server-link" href="#" target="_blank" class="server-join-btn">JOIN_SERVER ↗</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Custom cursor + coordinates readout
+        const cursor = document.getElementById('cursor');
+        const coordX = document.getElementById('coord-x');
+        const coordY = document.getElementById('coord-y');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            coordX.innerText = String(e.clientX).padStart(4, '0');
+            coordY.innerText = String(e.clientY).padStart(4, '0');
+        });
+
+        // Cursor grow on interactive elements
+        document.querySelectorAll('a, .card, .server-node, .footer-link, .form-submit, .form-field input, .form-field select, .form-check').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.width = '60px';
+                cursor.style.height = '60px';
+                cursor.style.background = 'rgba(255,255,255,0.1)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.width = '20px';
+                cursor.style.height = '20px';
+                cursor.style.background = 'transparent';
+            });
+        });
+
+        // Floating 3D card tilt + hover glow tracking
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--x', `${x}px`);
+                card.style.setProperty('--y', `${y}px`);
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (y - centerY) / 15;
+                const rotateY = (centerX - x) / 15;
+                card.style.transform = `perspective(1000px) translateY(-10px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(1000px) translateY(0) rotateX(0) rotateY(0)`;
+            });
+        });
+
+        // UTC clock
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getUTCHours()).padStart(2, '0');
+            const m = String(now.getUTCMinutes()).padStart(2, '0');
+            const s = String(now.getUTCSeconds()).padStart(2, '0');
+            document.getElementById('clock').innerText = `${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Contact form transmission
+        const contactForm = document.getElementById('contact-form');
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = contactForm.querySelector('.form-submit');
+            const original = btn.innerText;
+            btn.innerText = 'TRANSMISSION_SENT ✓';
+            btn.disabled = true;
+            setTimeout(() => {
+                contactForm.reset();
+                btn.innerText = original;
+                btn.disabled = false;
+            }, 3000);
+        });
+
+        // Terms & Conditions modal
+        const modal = document.getElementById('terms-modal');
+        const termsLink = document.getElementById('terms-link');
+        const modalClose = modal.querySelector('.modal-close');
+
+        termsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.classList.add('open');
+        });
+        modalClose.addEventListener('click', () => modal.classList.remove('open'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('open');
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') modal.classList.remove('open');
+        });
+
+        // Server detail modal
+        const serverModal = document.getElementById('server-modal');
+        const smBanner = document.getElementById('server-banner');
+        const smName = document.getElementById('server-name');
+        const smRole = document.getElementById('server-role');
+        const smLink = document.getElementById('server-link');
+        const smTag = document.getElementById('server-tag');
+
+        document.querySelectorAll('.server-node').forEach(node => {
+            node.addEventListener('click', () => {
+                smName.textContent = node.dataset.name;
+                smRole.innerHTML = 'MY ROLE: <strong>' + node.dataset.role + '</strong> // ' + node.dataset.scale;
+                smLink.href = node.dataset.link;
+                smBanner.src = node.dataset.banner;
+                smTag.textContent = node.dataset.tag;
+                serverModal.classList.add('open');
+            });
+        });
+
+        serverModal.querySelector('.modal-close').addEventListener('click', () => serverModal.classList.remove('open'));
+        serverModal.addEventListener('click', (e) => {
+            if (e.target === serverModal) serverModal.classList.remove('open');
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') serverModal.classList.remove('open');
+        });
+
+        // Navigation — smooth scroll to sections + scrollspy highlighting
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }); 
+
+        const spyIds = ['core', 'history', 'functions', 'artifacts'];
+        window.addEventListener('scroll', () => {
+            let current = 'core';
+            spyIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.getBoundingClientRect().top <= 220) current = id;
+            });
+            document.querySelectorAll('.nav-link').forEach(l => {
+                l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+            });
+        });
+    </script>
+
+</body>
+</html>
